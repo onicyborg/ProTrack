@@ -4,16 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ProjectEmployee extends Model
 {
-    use HasUuids;
+    use HasUuids, SoftDeletes;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'project_manager_id',
+        'employee_id',
+        'project_role_id',
+    ];
 
-    public function project()
+    public function projectManager()
     {
-        return $this->belongsTo(Project::class);
+        return $this->belongsTo(ProjectManager::class);
     }
 
     public function employee()

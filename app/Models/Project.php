@@ -17,9 +17,9 @@ class Project extends Model
         return $this->belongsTo(Client::class);
     }
 
-    public function pm()
+    public function projectManagers()
     {
-        return $this->belongsTo(Employee::class, 'pm_id');
+        return $this->hasMany(ProjectManager::class);
     }
 
     // Katalog Proyek
@@ -41,16 +41,37 @@ class Project extends Model
     // Operasional Proyek
     public function projectEmployees()
     {
-        return $this->hasMany(ProjectEmployee::class);
+        return $this->hasManyThrough(
+            ProjectEmployee::class,
+            ProjectManager::class,
+            'project_id',
+            'project_manager_id',
+            'id',
+            'id'
+        );
     }
 
     public function tasks()
     {
-        return $this->hasMany(Task::class);
+        return $this->hasManyThrough(
+            Task::class,
+            ProjectManager::class,
+            'project_id',
+            'project_manager_id',
+            'id',
+            'id'
+        );
     }
 
     public function dailyReports()
     {
-        return $this->hasMany(DailyReport::class);
+        return $this->hasManyThrough(
+            DailyReport::class,
+            ProjectManager::class,
+            'project_id',
+            'project_manager_id',
+            'id',
+            'id'
+        );
     }
 }

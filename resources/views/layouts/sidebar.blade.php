@@ -37,13 +37,6 @@
                         </a>
                     </div>
 
-                    <div class="menu-item">
-                        <a class="menu-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}" href="#">
-                            <span class="menu-icon"><i class="bi bi-person-gear fs-2"></i></span>
-                            <span class="menu-title">Manajemen Akun</span>
-                        </a>
-                    </div>
-
                     <div class="menu-content">
                         <div class="separator my-3"></div>
                         <span class="menu-heading text-uppercase text-muted fs-8">Proyek</span>

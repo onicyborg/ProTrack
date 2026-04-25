@@ -12,9 +12,9 @@ class DailyReport extends Model
 
     protected $guarded = ['id'];
 
-    public function project()
+    public function projectManager()
     {
-        return $this->belongsTo(Project::class);
+        return $this->belongsTo(ProjectManager::class);
     }
 
     public function works()

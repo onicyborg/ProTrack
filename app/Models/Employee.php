@@ -21,10 +21,15 @@ class Employee extends Model
         return $this->belongsTo(User::class);
     }
 
-    // Proyek di mana karyawan ini menjadi Project Manager
+    // Proyek di mana karyawan ini menjadi Project Manager (multi-PM)
     public function projectsAsPm()
     {
-        return $this->hasMany(Project::class, 'pm_id');
+        return $this->belongsToMany(Project::class, 'project_managers', 'pm_id', 'project_id');
+    }
+
+    public function projectManagers()
+    {
+        return $this->hasMany(ProjectManager::class, 'pm_id');
     }
 
     public function taskLogs()

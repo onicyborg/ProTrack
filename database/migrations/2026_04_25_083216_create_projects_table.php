@@ -15,7 +15,6 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('project_name');
             $table->uuid('client_id');
-            $table->uuid('pm_id');
             $table->string('account_code')->nullable();
             $table->string('budget_year')->nullable();
             $table->date('start_date')->nullable();
@@ -26,7 +25,6 @@ return new class extends Migration
 
             // Relasi
             $table->foreign('client_id')->references('id')->on('clients')->onDelete('cascade');
-            $table->foreign('pm_id')->references('id')->on('employees')->onDelete('cascade');
         });
     }
 

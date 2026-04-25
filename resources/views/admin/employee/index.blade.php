@@ -29,14 +29,25 @@
                                 <td>{{ $employee->employee_name }}</td>
                                 <td>{{ $employee->position ?? '-' }}</td>
                                 <td>{{ $employee->user?->username ?? '-' }}</td>
-                                <td>{{ $employee->user?->role ?? '-' }}</td>
+                                <td>
+                                    @php
+                                        $role = $employee->user?->role ?? 'employee';
+                                        $badgeClass = match ($role) {
+                                            'admin' => 'badge-light-danger',
+                                            'pm' => 'badge-light-primary',
+                                            default => 'badge-light-success',
+                                        };
+                                    @endphp
+                                    <span class="badge {{ $badgeClass }}">{{ strtoupper($role) }}</span>
+                                </td>
                                 <td class="text-end">
                                     <button type="button" class="btn btn-sm btn-light-primary btnEditEmployee"
                                         data-id="{{ $employee->id }}"
                                         data-employee_name="{{ $employee->employee_name }}"
                                         data-position="{{ $employee->position }}"
                                         data-username="{{ $employee->user?->username }}"
-                                        data-role="{{ $employee->user?->role }}">
+                                        data-role="{{ $employee->user?->role ?? 'employee' }}"
+                                        data-has_user="{{ $employee->user_id ? '1' : '0' }}">
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
                                     <button type="button" class="btn btn-sm btn-light-danger btnDeleteEmployee"
@@ -79,23 +90,26 @@
                         </div>
 
                         <div class="mb-4">
-                            <label class="form-label required">Username</label>
-                            <input type="text" name="username" id="employee_username" class="form-control" required />
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label" id="password_label">Password</label>
-                            <input type="password" name="password" id="employee_password" class="form-control" autocomplete="off" />
-                            <div class="form-text" id="password_help" style="display:none;">Kosongkan jika tidak ingin mengubah password.</div>
-                        </div>
-
-                        <div class="mb-4">
                             <label class="form-label required">Role</label>
                             <select name="role" id="employee_role" class="form-select select2-role" required>
                                 <option value="">-- Pilih Role --</option>
+                                <option value="admin">Admin</option>
                                 <option value="pm">PM</option>
                                 <option value="employee">Employee</option>
                             </select>
+                        </div>
+
+                        <div id="account_fields" style="display:none;">
+                            <div class="mb-4">
+                                <label class="form-label" id="username_label">Username</label>
+                                <input type="text" name="username" id="employee_username" class="form-control" />
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label" id="password_label">Password</label>
+                                <input type="password" name="password" id="employee_password" class="form-control" autocomplete="off" />
+                                <div class="form-text" id="password_help">Kosongkan untuk menggunakan password default: Qwerty123*.</div>
+                            </div>
                         </div>
                     </div>
 
@@ -149,18 +163,65 @@
         var storeUrl = "{{ route('admin.employees.store') }}";
         var baseUrl = "{{ url('admin/employees') }}";
 
+        var formMode = 'create';
+        var hasUser = false;
+
+        function setPasswordHelpText(role) {
+            var help = document.getElementById('password_help');
+            if (!help) return;
+
+            var needsAccount = (role === 'admin' || role === 'pm');
+            if (!needsAccount) return;
+
+            if (formMode === 'create' || !hasUser) {
+                help.textContent = 'Kosongkan untuk menggunakan password default: Qwerty123*.';
+                return;
+            }
+
+            help.textContent = 'Kosongkan jika tidak ingin mengubah password.';
+        }
+
+        function toggleAccountFields(role) {
+            var wrap = document.getElementById('account_fields');
+            var username = document.getElementById('employee_username');
+            var password = document.getElementById('employee_password');
+            var usernameLabel = document.getElementById('username_label');
+
+            var needsAccount = (role === 'admin' || role === 'pm');
+
+            if (wrap) wrap.style.display = needsAccount ? 'block' : 'none';
+            if (username) {
+                username.required = needsAccount;
+                if (!needsAccount) username.value = '';
+            }
+            if (password) {
+                password.required = false;
+                if (!needsAccount) password.value = '';
+            }
+            if (usernameLabel) {
+                if (needsAccount) usernameLabel.classList.add('required');
+                else usernameLabel.classList.remove('required');
+            }
+
+            setPasswordHelpText(role);
+        }
+
         function initSelect2() {
-            if (window.$ && window.$.fn && window.$.fn.select2) {
-                window.$('.select2-role').select2({
-                    dropdownParent: window.$('#employeeModal'),
+            if (window.jQuery && window.jQuery.fn && window.jQuery.fn.select2) {
+                window.jQuery('.select2-role').select2({
+                    dropdownParent: window.jQuery('#employeeModal'),
                     width: '100%'
                 });
             }
         }
 
-        window.$(employeeModalEl).on('shown.bs.modal', function () {
-            initSelect2();
-        });
+        toggleAccountFields('');
+
+        if (window.jQuery) {
+            window.jQuery(employeeModalEl).on('shown.bs.modal', function () {
+                initSelect2();
+            });
+        }
 
         document.getElementById('btnAddEmployee').addEventListener('click', function () {
             employeeForm.action = storeUrl;
@@ -168,10 +229,21 @@
             employeeModalTitle.textContent = 'Tambah Karyawan';
             employeeForm.reset();
 
-            document.getElementById('employee_password').required = true;
-            document.getElementById('password_label').classList.add('required');
-            document.getElementById('password_help').style.display = 'none';
+            formMode = 'create';
+            hasUser = false;
+
+            toggleAccountFields(document.getElementById('employee_role').value);
         });
+
+        document.getElementById('employee_role').addEventListener('change', function () {
+            toggleAccountFields(this.value);
+        });
+
+        if (window.jQuery) {
+            window.jQuery('#employee_role').on('select2:select', function () {
+                toggleAccountFields(this.value);
+            });
+        }
 
         jQuery('#employee_table').on('click', '.btnEditEmployee', function () {
             var btn = this;
@@ -179,20 +251,22 @@
             employeeFormMethod.value = 'PUT';
             employeeModalTitle.textContent = 'Edit Karyawan';
 
+            formMode = 'edit';
+            hasUser = btn.dataset.has_user === '1';
+
             document.getElementById('employee_name').value = btn.dataset.employee_name || '';
             document.getElementById('employee_position').value = btn.dataset.position || '';
             document.getElementById('employee_username').value = btn.dataset.username || '';
 
             document.getElementById('employee_password').value = '';
-            document.getElementById('employee_password').required = false;
-            document.getElementById('password_label').classList.remove('required');
-            document.getElementById('password_help').style.display = 'block';
 
             var roleSelect = document.getElementById('employee_role');
             roleSelect.value = btn.dataset.role || '';
-            if (window.$ && window.$.fn && window.$.fn.select2) {
-                window.$(roleSelect).trigger('change');
+            if (window.jQuery && window.jQuery.fn && window.jQuery.fn.select2) {
+                window.jQuery(roleSelect).trigger('change');
             }
+
+            toggleAccountFields(roleSelect.value);
 
             var modal = bootstrap.Modal.getOrCreateInstance(employeeModalEl);
             modal.show();

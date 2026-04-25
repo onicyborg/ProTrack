@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('daily_reports', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('project_id');
+            $table->uuid('project_manager_id');
             $table->date('report_date');
             $table->string('weather_condition')->nullable();
             $table->string('weather_time')->nullable();
@@ -23,7 +23,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
+            $table->foreign('project_manager_id')->references('id')->on('project_managers')->onDelete('cascade');
         });
     }
 

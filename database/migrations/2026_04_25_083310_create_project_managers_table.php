@@ -11,16 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('employees', function (Blueprint $table) {
+        Schema::create('project_managers', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('user_id')->nullable()->unique();
-            $table->string('employee_name');
-            $table->string('position')->nullable();
+            $table->uuid('project_id');
+            $table->uuid('pm_id');
             $table->timestamps();
             $table->softDeletes();
 
-            // Relasi
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
+            $table->foreign('pm_id')->references('id')->on('employees')->onDelete('cascade');
         });
     }
 
@@ -29,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('employees');
+        Schema::dropIfExists('project_managers');
     }
 };
