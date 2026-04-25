@@ -17,6 +17,16 @@ class DailyReport extends Model
         return $this->belongsTo(ProjectManager::class);
     }
 
+    public function supervisor()
+    {
+        return $this->belongsTo(Employee::class, 'supervisor_id');
+    }
+
+    public function executor()
+    {
+        return $this->belongsTo(Employee::class, 'executor_id');
+    }
+
     public function works()
     {
         return $this->hasMany(ReportWork::class);

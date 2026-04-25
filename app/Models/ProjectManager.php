@@ -25,6 +25,11 @@ class ProjectManager extends Model
         return $this->belongsTo(Employee::class, 'pm_id');
     }
 
+    public function employee()
+    {
+        return $this->belongsTo(Employee::class, 'pm_id');
+    }
+
     public function projectEmployees()
     {
         return $this->hasMany(ProjectEmployee::class);

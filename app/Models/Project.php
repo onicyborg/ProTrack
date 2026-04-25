@@ -10,7 +10,15 @@ class Project extends Model
 {
     use HasUuids, SoftDeletes;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'project_name',
+        'client_id',
+        'account_code',
+        'budget_year',
+        'start_date',
+        'end_date',
+        'status',
+    ];
 
     public function client()
     {

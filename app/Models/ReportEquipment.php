@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class ReportEquipment extends Model
 {
     use HasUuids;
+
+    protected $table = 'report_equipments';
     protected $guarded = ['id'];
 
     public function dailyReport()

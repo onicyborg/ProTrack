@@ -10,7 +10,10 @@ class ProjectRole extends Model
 {
     use HasUuids, SoftDeletes;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'project_id',
+        'role_name',
+    ];
 
     public function project()
     {

@@ -43,7 +43,7 @@
                     </div>
 
                     <div class="menu-item">
-                        <a class="menu-link {{ request()->routeIs('admin.projects.*') ? 'active' : '' }}" href="#">
+                        <a class="menu-link {{ request()->routeIs('admin.projects.*') ? 'active' : '' }}" href="{{ route('admin.projects.index') }}">
                             <span class="menu-icon"><i class="bi bi-kanban fs-2"></i></span>
                             <span class="menu-title">Manajemen Proyek</span>
                         </a>
@@ -53,7 +53,7 @@
                 @elseif ($role === 'pm')
                     <div class="menu-item">
                         <a class="menu-link {{ request()->routeIs('pm.dashboard') ? 'active' : '' }}" href="{{ route('pm.dashboard') }}">
-                            <span class="menu-icon"><i class="bi bi-speedometer2 fs-2"></i></span>
+                            <span class="menu-icon"><i class="ki-duotone ki-element-11 fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i></span>
                             <span class="menu-title">Dashboard</span>
                         </a>
                     </div>
@@ -64,8 +64,8 @@
                     </div>
 
                     <div class="menu-item">
-                        <a class="menu-link {{ request()->routeIs('pm.projects.*') ? 'active' : '' }}" href="#">
-                            <span class="menu-icon"><i class="bi bi-kanban fs-2"></i></span>
+                        <a class="menu-link {{ request()->routeIs('pm.projects.*') ? 'active' : '' }}" href="{{ route('pm.projects.index') }}">
+                            <span class="menu-icon"><i class="ki-duotone ki-briefcase fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i></span>
                             <span class="menu-title">Proyek Saya</span>
                         </a>
                     </div>

@@ -10,6 +10,8 @@ class ProjectEquipment extends Model
 {
     use HasUuids, SoftDeletes;
 
+    protected $table = 'project_equipments';
+
     protected $guarded = ['id'];
 
     public function project()

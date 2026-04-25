@@ -23,33 +23,29 @@ class UserSeeder extends Seeder
                 'role'     => 'admin',
             ]);
 
-            // Akun PM #1
-            $pmUser1 = User::create([
-                'username' => 'pm1',
-                'password' => Hash::make('Qwerty123*'),
-                'role'     => 'pm',
-            ]);
+            $pms = [
+                ['username' => 'pm1', 'employee_name' => 'PM Andi'],
+                ['username' => 'pm2', 'employee_name' => 'PM Bima'],
+                ['username' => 'pm3', 'employee_name' => 'PM Citra'],
+                ['username' => 'pm4', 'employee_name' => 'PM Deni'],
+                ['username' => 'pm5', 'employee_name' => 'PM Eka'],
+            ];
 
-            Employee::create([
-                'user_id'       => $pmUser1->id,
-                'employee_name' => 'John Doe',
-                'position'      => 'Project Manager',
-            ]);
+            foreach ($pms as $pm) {
+                $pmUser = User::create([
+                    'username' => $pm['username'],
+                    'password' => Hash::make('Qwerty123*'),
+                    'role'     => 'pm',
+                ]);
 
-            // Akun PM #2 (untuk demo multi-PM)
-            $pmUser2 = User::create([
-                'username' => 'pm2',
-                'password' => Hash::make('Qwerty123*'),
-                'role'     => 'pm',
-            ]);
-
-            Employee::create([
-                'user_id'       => $pmUser2->id,
-                'employee_name' => 'Jane Doe',
-                'position'      => 'Project Manager',
-            ]);
+                Employee::create([
+                    'user_id'       => $pmUser->id,
+                    'employee_name' => $pm['employee_name'],
+                    'position'      => 'Project Manager',
+                ]);
+            }
         });
 
-        $this->command->info('Seeder berhasil: Admin dan 2 PM telah dibuat!');
+        $this->command->info('Seeder berhasil: Admin dan 5 PM telah dibuat!');
     }
 }

@@ -24,12 +24,19 @@ class Employee extends Model
     // Proyek di mana karyawan ini menjadi Project Manager (multi-PM)
     public function projectsAsPm()
     {
-        return $this->belongsToMany(Project::class, 'project_managers', 'pm_id', 'project_id');
+        return $this->belongsToMany(Project::class, 'project_managers', 'pm_id', 'project_id')
+            ->wherePivotNull('deleted_at')
+            ->distinct();
     }
 
     public function projectManagers()
     {
         return $this->hasMany(ProjectManager::class, 'pm_id');
+    }
+
+    public function projectEmployees()
+    {
+        return $this->hasMany(ProjectEmployee::class);
     }
 
     public function taskLogs()

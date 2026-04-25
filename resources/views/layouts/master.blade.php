@@ -30,6 +30,10 @@
     <link href="{{ asset('assets/css/style.bundle.css') }}" rel="stylesheet" type="text/css" />
     <style>
         [data-bs-theme="light"] #kt_app_sidebar_logo .sidebar-title { color: #fff !important; }
+        html, body { overflow-x: hidden; }
+        .select2-container { width: 100%; }
+        .select2-container--open { z-index: 1060; }
+        .select2-dropdown { z-index: 1060; }
     </style>
 
     @stack('styles')

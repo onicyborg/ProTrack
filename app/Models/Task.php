@@ -22,6 +22,11 @@ class Task extends Model
         return $this->hasMany(TaskAssignment::class);
     }
 
+    public function subtasks()
+    {
+        return $this->hasMany(TaskSubtask::class);
+    }
+
     public function logs()
     {
         return $this->hasMany(EmployeeTaskLog::class);
