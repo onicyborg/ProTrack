@@ -10,7 +10,11 @@ class Employee extends Model
 {
     use HasUuids, SoftDeletes;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'user_id',
+        'employee_name',
+        'position',
+    ];
 
     public function user()
     {
