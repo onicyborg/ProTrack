@@ -3,8 +3,13 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\ClientController;
+use App\Http\Controllers\Admin\CalendarController;
+use App\Http\Controllers\Admin\DailyReportController as AdminDailyReportController;
 use App\Http\Controllers\Admin\EmployeeController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ProjectController;
+use App\Http\Controllers\PM\DashboardController as PMDashboardController;
+use App\Http\Controllers\PM\CalendarController as PMCalendarController;
 use App\Http\Controllers\PM\ProjectController as PMProjectController;
 use App\Http\Controllers\PM\DailyReportController;
 use App\Http\Controllers\PM\ProjectTaskController;
@@ -32,6 +37,18 @@ Route::get('/', function () {
     };
 });
 
+Route::get('/dashboard', function () {
+    if (!auth()->check()) {
+        return redirect()->route('login');
+    }
+
+    return match (auth()->user()->role) {
+        'admin' => redirect()->route('admin.dashboard'),
+        'pm'    => redirect()->route('pm.dashboard'),
+        default => redirect()->route('login'),
+    };
+})->middleware('auth')->name('dashboard');
+
 /*
 |--------------------------------------------------------------------------
 | Auth Routes
@@ -52,9 +69,13 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->n
 
 // Admin Routes
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('calendar', [CalendarController::class, 'index'])->name('calendar.index');
+    Route::get('calendar/events', [CalendarController::class, 'getEvents'])->name('calendar.events');
+
+    Route::get('daily-reports/{dailyReport}', [AdminDailyReportController::class, 'show'])->name('daily-reports.show');
+    Route::get('daily-report/{dailyReport}/download-pdf', [AdminDailyReportController::class, 'downloadPdf'])->name('daily-reports.download-pdf');
 
     Route::resource('clients', ClientController::class)->except(['show', 'create', 'edit']);
 
@@ -72,10 +93,13 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
 
 // PM Routes
 Route::prefix('pm')->middleware(['auth', 'role:pm'])->name('pm.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('pm.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [PMDashboardController::class, 'index'])->name('dashboard');
 
+    Route::get('calendar', [PMCalendarController::class, 'index'])->name('calendar.index');
+    Route::get('calendar/events', [PMCalendarController::class, 'getEvents'])->name('calendar.events');
+    Route::get('calendar/check-report', [PMCalendarController::class, 'checkReport'])->name('calendar.check');
+
+    Route::get('daily-report/{dailyReport}/download-pdf', [DailyReportController::class, 'downloadPdf'])->name('daily-reports.download-pdf');
     Route::resource('daily-reports', DailyReportController::class);
 
     Route::get('projects', [PMProjectController::class, 'index'])->name('projects.index');

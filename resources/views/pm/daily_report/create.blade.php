@@ -27,7 +27,7 @@
                 <div class="row g-4">
                     <div class="col-md-4">
                         <label class="form-label required">Tanggal</label>
-                        <input type="date" name="report_date" class="form-control" value="{{ old('report_date') }}" @if($project->start_date) min="{{ $project->start_date }}" @endif @if($project->end_date) max="{{ $project->end_date }}" @endif required>
+                        <input type="date" name="report_date" class="form-control" value="{{ old('report_date', $prefillReportDate ?? '') }}" @if($project->start_date) min="{{ $project->start_date }}" @endif @if($project->end_date) max="{{ $project->end_date }}" @endif required>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label required" for="weather_condition">Cuaca</label>
@@ -170,7 +170,7 @@
                                         <select name="works[0][task_id]" class="form-select select2-task" required>
                                             <option value="">- pilih -</option>
                                             @foreach($tasks as $t)
-                                                <option value="{{ $t->id }}">{{ $t->task_name }}</option>
+                                                <option value="{{ $t->id }}" @selected(($prefillTaskId ?? '') === $t->id)>{{ $t->task_name }}</option>
                                             @endforeach
                                         </select>
                                     </td>

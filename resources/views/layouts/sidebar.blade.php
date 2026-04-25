@@ -49,6 +49,13 @@
                         </a>
                     </div>
 
+                    <div class="menu-item">
+                        <a class="menu-link {{ request()->routeIs('admin.calendar.*') ? 'active' : '' }}" href="{{ route('admin.calendar.index') }}">
+                            <span class="menu-icon"><i class="bi bi-calendar-week fs-2"></i></span>
+                            <span class="menu-title">Monitoring Kalender</span>
+                        </a>
+                    </div>
+
                 {{-- ============ PM ============ --}}
                 @elseif ($role === 'pm')
                     <div class="menu-item">
@@ -67,6 +74,13 @@
                         <a class="menu-link {{ request()->routeIs('pm.projects.*') ? 'active' : '' }}" href="{{ route('pm.projects.index') }}">
                             <span class="menu-icon"><i class="ki-duotone ki-briefcase fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i></span>
                             <span class="menu-title">Proyek Saya</span>
+                        </a>
+                    </div>
+
+                    <div class="menu-item">
+                        <a class="menu-link {{ request()->routeIs('pm.calendar.*') ? 'active' : '' }}" href="{{ route('pm.calendar.index') }}">
+                            <span class="menu-icon"><i class="bi bi-calendar-week fs-2"></i></span>
+                            <span class="menu-title">Monitoring Kalender</span>
                         </a>
                     </div>
                 @endif

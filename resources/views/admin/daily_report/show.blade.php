@@ -11,14 +11,11 @@
             </div>
         </div>
         <div class="d-flex gap-2">
-            <a href="{{ route('pm.daily-reports.index', ['project_id' => $dailyReport->projectManager?->project_id]) }}" class="btn btn-light">
+            <a href="{{ route('admin.calendar.index') }}" class="btn btn-light">
                 <i class="bi bi-arrow-left me-2"></i>Kembali
             </a>
-            <a href="{{ route('pm.daily-reports.download-pdf', $dailyReport->id) }}" class="btn btn-light-danger">
+            <a href="{{ route('admin.daily-reports.download-pdf', $dailyReport->id) }}" class="btn btn-light-danger">
                 <i class="bi bi-file-earmark-pdf me-2"></i>Unduh PDF
-            </a>
-            <a href="{{ route('pm.daily-reports.edit', $dailyReport->id) }}" class="btn btn-light-warning">
-                <i class="bi bi-pencil-square me-2"></i>Edit
             </a>
         </div>
     </div>
