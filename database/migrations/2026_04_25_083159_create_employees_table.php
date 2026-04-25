@@ -11,14 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('employees', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('username')->unique();
-            $table->string('password');
-            $table->string('role'); // admin, pm, employee
-            $table->rememberToken();
+            $table->uuid('user_id')->unique();
+            $table->string('employee_name');
+            $table->string('position')->nullable();
             $table->timestamps();
             $table->softDeletes();
+
+            // Relasi
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
@@ -27,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('employees');
     }
 };
