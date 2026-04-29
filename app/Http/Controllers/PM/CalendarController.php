@@ -7,10 +7,12 @@ use App\Models\DailyReport;
 use App\Models\Employee;
 use App\Models\Project;
 use App\Models\Task;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CalendarController extends Controller
 {
@@ -41,6 +43,92 @@ class CalendarController extends Controller
         $selectedProjectId = $request->query('project_id');
 
         return view('pm.calendar.index', compact('projects', 'selectedProjectId'));
+    }
+
+    public function downloadDailyReportsByDate(Request $request)
+    {
+        $employeeId = $this->pmEmployee()->id;
+
+        $validated = $request->validate([
+            'start_date' => ['required', 'date'],
+            'end_date' => ['required', 'date', 'after_or_equal:start_date'],
+            'project_id' => ['nullable', 'uuid', 'exists:projects,id'],
+        ]);
+
+        $startDate = Carbon::parse($validated['start_date'])->toDateString();
+        $endDate = Carbon::parse($validated['end_date'])->toDateString();
+        $projectId = $validated['project_id'] ?? null;
+
+        $reportsQuery = DailyReport::query()
+            ->whereNull('daily_reports.deleted_at')
+            ->whereDate('daily_reports.report_date', '>=', $startDate)
+            ->whereDate('daily_reports.report_date', '<=', $endDate)
+            ->whereHas('projectManager', function ($q) use ($employeeId, $projectId) {
+                $q->where('pm_id', $employeeId)
+                    ->whereNull('deleted_at');
+
+                if ($projectId) {
+                    $q->where('project_id', $projectId);
+                }
+            })
+            ->with([
+                'projectManager.project.client',
+                'supervisor',
+                'executor',
+                'works.task',
+                'materials.projectMaterial',
+                'equipments.projectEquipment',
+            ])
+            ->orderBy('daily_reports.report_date')
+            ->orderBy('daily_reports.created_at');
+
+        $reports = $reportsQuery->get();
+
+        if ($reports->isEmpty()) {
+            return redirect()->back()->with('error', 'Tidak ada Daily Report pada rentang tanggal tersebut.');
+        }
+
+        $items = $reports->map(function (DailyReport $dailyReport) {
+            $project = $dailyReport->projectManager?->project;
+            if (!$project) {
+                return null;
+            }
+
+            $executionDays = null;
+            if ($project->start_date && $project->end_date) {
+                $executionDays = Carbon::parse($project->start_date)->diffInDays(Carbon::parse($project->end_date)) + 1;
+            }
+
+            $reportDate = $dailyReport->report_date;
+            $pmLinkId = $dailyReport->project_manager_id;
+
+            $manpowerByRole = DB::table('employee_task_logs as l')
+                ->join('tasks as t', 't.id', '=', 'l.task_id')
+                ->join('project_employees as pe', function ($join) use ($pmLinkId) {
+                    $join->on('pe.employee_id', '=', 'l.employee_id')
+                        ->where('pe.project_manager_id', '=', $pmLinkId)
+                        ->whereNull('pe.deleted_at');
+                })
+                ->join('project_roles as pr', 'pr.id', '=', 'pe.project_role_id')
+                ->whereNull('l.deleted_at')
+                ->where('l.log_date', $reportDate)
+                ->where('t.project_manager_id', $pmLinkId)
+                ->groupBy('pr.role_name')
+                ->select('pr.role_name', DB::raw('COUNT(DISTINCT l.employee_id) as total'))
+                ->orderBy('pr.role_name')
+                ->get();
+
+            return [
+                'dailyReport' => $dailyReport,
+                'executionDays' => $executionDays,
+                'manpowerByRole' => $manpowerByRole,
+            ];
+        })->filter()->values();
+
+        $pdf = Pdf::loadView('pdf.daily_report_range', compact('items'))
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->download('daily-reports-' . $startDate . '-' . $endDate . '.pdf');
     }
 
     public function getEvents(Request $request)

@@ -64,6 +64,9 @@ class DailyReportController extends Controller
     {
         $rules = [
             'report_date' => ['required', 'date'],
+            'kegiatan' => ['nullable', 'string', 'max:255'],
+            'rincian_kegiatan' => ['nullable', 'string', 'max:255'],
+            'lokasi_kegiatan' => ['nullable', 'string', 'max:255'],
             'weather_condition' => ['required', Rule::in(['Cerah', 'Hujan', 'Mendung'])],
             'weather_time' => ['nullable', 'string', 'max:50'],
             'weather_notes' => ['nullable', 'string'],
@@ -101,18 +104,28 @@ class DailyReportController extends Controller
         return $rules;
     }
 
-    private function detailRules(Project $project, ProjectManager $pmLink): array
+    private function detailRules(Project $project, ProjectManager $pmLink, ?string $reportDate = null): array
     {
+        $taskIdRule = Rule::exists('tasks', 'id')
+            ->where(function ($q) use ($pmLink, $reportDate) {
+                $q->where('project_manager_id', $pmLink->id)
+                    ->whereNull('deleted_at');
+
+                if ($reportDate) {
+                    $q->where(function ($qq) use ($reportDate) {
+                        $qq->whereNull('start_date')->orWhereDate('start_date', '<=', $reportDate);
+                    })->where(function ($qq) use ($reportDate) {
+                        $qq->whereNull('end_date')->orWhereDate('end_date', '>=', $reportDate);
+                    });
+                }
+            });
+
         return [
             'works' => ['required', 'array', 'min:1'],
             'works.*.task_id' => [
                 'required',
                 'uuid',
-                Rule::exists('tasks', 'id')
-                    ->where(function ($q) use ($pmLink) {
-                        $q->where('project_manager_id', $pmLink->id)
-                            ->whereNull('deleted_at');
-                    }),
+                $taskIdRule,
             ],
             'works.*.volume' => ['required', 'numeric', 'min:0'],
 
@@ -172,7 +185,8 @@ class DailyReportController extends Controller
             ->with(['project.client'])
             ->get();
 
-        $selectedProjectId = $request->query('project_id') ?: ($pmLinks->first()?->project_id);
+        $selectedProjectId = $request->query('project_id');
+        $selectedProjectId = $selectedProjectId ?: null;
 
         $reportsQuery = DailyReport::query()
             ->whereIn('project_manager_id', $pmLinks->pluck('id')->all())
@@ -271,11 +285,11 @@ class DailyReportController extends Controller
         $project = Project::query()->findOrFail($validatedProject['project_id']);
         $pmLink = $this->pmLink($project);
 
-        $validated = $request->validate(array_merge(
-            $this->headerRules($project, $pmLink),
-            $this->detailRules($project, $pmLink),
-            $this->teamRules($pmLink)
-        ));
+        $validatedHeader = $request->validate($this->headerRules($project, $pmLink));
+        $validatedDetail = $request->validate($this->detailRules($project, $pmLink, $validatedHeader['report_date']));
+        $validatedTeam = $request->validate($this->teamRules($pmLink));
+
+        $validated = array_merge($validatedHeader, $validatedDetail, $validatedTeam);
 
         $teamPresentIds = collect($validated['team_present'] ?? [])->filter()->unique()->values();
         $teamActivityById = is_array(($validated['team_activity'] ?? null)) ? $validated['team_activity'] : [];
@@ -295,6 +309,9 @@ class DailyReportController extends Controller
             $dailyReport = DailyReport::create([
                 'project_manager_id' => $pmLink->id,
                 'report_date' => $validated['report_date'],
+                'kegiatan' => $validated['kegiatan'] ?? null,
+                'rincian_kegiatan' => $validated['rincian_kegiatan'] ?? null,
+                'lokasi_kegiatan' => $validated['lokasi_kegiatan'] ?? null,
                 'weather_condition' => $validated['weather_condition'],
                 'weather_time' => $validated['weather_time'] ?? null,
                 'weather_notes' => $validated['weather_notes'] ?? null,
@@ -439,6 +456,36 @@ class DailyReportController extends Controller
         return $pdf->download('daily-report-' . $dailyReport->id . '.pdf');
     }
 
+    public function tasksByDate(Request $request)
+    {
+        $validated = $request->validate([
+            'project_id' => ['required', 'uuid', 'exists:projects,id'],
+            'date' => ['required', 'date'],
+        ]);
+
+        $project = Project::query()->findOrFail($validated['project_id']);
+        $pmLink = $this->pmLink($project);
+        $date = Carbon::parse($validated['date'])->toDateString();
+
+        $tasks = Task::query()
+            ->where('project_manager_id', $pmLink->id)
+            ->whereNull('deleted_at')
+            ->where(function ($q) use ($date) {
+                $q->whereNull('start_date')->orWhereDate('start_date', '<=', $date);
+            })
+            ->where(function ($q) use ($date) {
+                $q->whereNull('end_date')->orWhereDate('end_date', '>=', $date);
+            })
+            ->orderBy('task_name')
+            ->get(['id', 'task_name']);
+
+        return response()->json(
+            $tasks->map(function ($t) {
+                return ['id' => $t->id, 'text' => $t->task_name];
+            })->values()
+        );
+    }
+
     public function edit(DailyReport $dailyReport)
     {
         $employeeId = $this->pmEmployee()->id;
@@ -528,11 +575,11 @@ class DailyReportController extends Controller
         $pmLink = $this->pmLink($project);
         $this->assertReportBelongsToPm($pmLink, $dailyReport);
 
-        $validated = $request->validate(array_merge(
-            $this->headerRules($project, $pmLink),
-            $this->detailRules($project, $pmLink),
-            $this->teamRules($pmLink)
-        ));
+        $validatedHeader = $request->validate($this->headerRules($project, $pmLink));
+        $validatedDetail = $request->validate($this->detailRules($project, $pmLink, $validatedHeader['report_date']));
+        $validatedTeam = $request->validate($this->teamRules($pmLink));
+
+        $validated = array_merge($validatedHeader, $validatedDetail, $validatedTeam);
 
         $teamPresentIds = collect($validated['team_present'] ?? [])->filter()->unique()->values();
         $teamActivityById = is_array(($validated['team_activity'] ?? null)) ? $validated['team_activity'] : [];
@@ -565,6 +612,9 @@ class DailyReportController extends Controller
         DB::transaction(function () use ($validated, $dailyReport, $employeeNameById, $teamPresentIds, $teamActivityById, $attendanceTaskId, $teamEmployeeIds, $pmTaskIds, $oldReportDate) {
             $dailyReport->update([
                 'report_date' => $validated['report_date'],
+                'kegiatan' => $validated['kegiatan'] ?? null,
+                'rincian_kegiatan' => $validated['rincian_kegiatan'] ?? null,
+                'lokasi_kegiatan' => $validated['lokasi_kegiatan'] ?? null,
                 'weather_condition' => $validated['weather_condition'],
                 'weather_time' => $validated['weather_time'] ?? null,
                 'weather_notes' => $validated['weather_notes'] ?? null,

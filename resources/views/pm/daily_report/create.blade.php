@@ -27,7 +27,19 @@
                 <div class="row g-4">
                     <div class="col-md-4">
                         <label class="form-label required">Tanggal</label>
-                        <input type="date" name="report_date" class="form-control" value="{{ old('report_date', $prefillReportDate ?? '') }}" @if($project->start_date) min="{{ $project->start_date }}" @endif @if($project->end_date) max="{{ $project->end_date }}" @endif required>
+                        <input type="date" name="report_date" id="report_date" class="form-control" value="{{ old('report_date', $prefillReportDate ?? '') }}" @if($project->start_date) min="{{ $project->start_date }}" @endif @if($project->end_date) max="{{ $project->end_date }}" @endif required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="kegiatan">Kegiatan</label>
+                        <input type="text" name="kegiatan" id="kegiatan" class="form-control" value="{{ old('kegiatan') }}" placeholder="Kegiatan">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="lokasi_kegiatan">Lokasi Kegiatan</label>
+                        <input type="text" name="lokasi_kegiatan" id="lokasi_kegiatan" class="form-control" value="{{ old('lokasi_kegiatan') }}" placeholder="Lokasi">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label" for="rincian_kegiatan">Rincian Kegiatan</label>
+                        <input type="text" name="rincian_kegiatan" id="rincian_kegiatan" class="form-control" value="{{ old('rincian_kegiatan') }}" placeholder="Rincian kegiatan">
                     </div>
                     <div class="col-md-4">
                         <label class="form-label required" for="weather_condition">Cuaca</label>
@@ -380,6 +392,61 @@
         initSelect2('.select2-material');
         initSelect2('.select2-equipment');
 
+        var tasksByDateUrl = "{{ route('pm.daily-reports.tasks-by-date') }}";
+        var projectId = "{{ $project->id }}";
+        var cachedTasks = null;
+
+        function applyTasksToSelect(selectEl, tasks) {
+            if (!selectEl) return;
+            var currentVal = selectEl.value;
+
+            while (selectEl.firstChild) {
+                selectEl.removeChild(selectEl.firstChild);
+            }
+
+            var def = document.createElement('option');
+            def.value = '';
+            def.textContent = '- pilih -';
+            selectEl.appendChild(def);
+
+            (tasks || []).forEach(function (t) {
+                var opt = document.createElement('option');
+                opt.value = t.id;
+                opt.textContent = t.text;
+                selectEl.appendChild(opt);
+            });
+
+            if (currentVal) {
+                selectEl.value = currentVal;
+            }
+
+            initSelect2(selectEl);
+        }
+
+        function applyTasksToAllSelects(tasks) {
+            document.querySelectorAll('select.select2-task').forEach(function (sel) {
+                applyTasksToSelect(sel, tasks);
+            });
+        }
+
+        function fetchTasksByDate(dateStr) {
+            if (!dateStr) {
+                cachedTasks = null;
+                return;
+            }
+
+            var url = tasksByDateUrl + '?project_id=' + encodeURIComponent(projectId) + '&date=' + encodeURIComponent(dateStr);
+            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    cachedTasks = Array.isArray(data) ? data : [];
+                    applyTasksToAllSelects(cachedTasks);
+                })
+                .catch(function () {
+                    cachedTasks = null;
+                });
+        }
+
         if (window.jQuery) {
             (function () {
                 var closeOnScroll = function () {
@@ -416,6 +483,20 @@
             target.appendChild(tr);
 
             initSelect2(tr.querySelectorAll('select'));
+
+            if (Array.isArray(cachedTasks)) {
+                tr.querySelectorAll('select.select2-task').forEach(function (sel) {
+                    applyTasksToSelect(sel, cachedTasks);
+                });
+            }
+        }
+
+        var reportDateInput = document.getElementById('report_date');
+        if (reportDateInput) {
+            fetchTasksByDate(reportDateInput.value);
+            reportDateInput.addEventListener('change', function () {
+                fetchTasksByDate(reportDateInput.value);
+            });
         }
 
         document.getElementById('btnAddWork')?.addEventListener('click', function () {

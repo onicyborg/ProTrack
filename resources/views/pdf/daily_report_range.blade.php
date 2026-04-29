@@ -31,7 +31,18 @@
     </style>
 </head>
 <body>
-@include('pdf.partials.daily_report_content')
+@foreach($items as $item)
+    @php
+        $dailyReport = $item['dailyReport'];
+        $executionDays = $item['executionDays'] ?? null;
+        $manpowerByRole = $item['manpowerByRole'] ?? [];
+    @endphp
 
+    @include('pdf.partials.daily_report_content')
+
+    @if(!$loop->last)
+        <div style="page-break-after: always;"></div>
+    @endif
+@endforeach
 </body>
 </html>

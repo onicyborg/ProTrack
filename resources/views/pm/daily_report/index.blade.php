@@ -20,6 +20,7 @@
                 <div class="col-md-6">
                     <label class="form-label">Proyek</label>
                     <select name="project_id" id="project_id" class="form-select">
+                        <option value="" @selected(!$selectedProjectId)>Semua Proyek</option>
                         @foreach($pmLinks as $link)
                             <option value="{{ $link->project_id }}" @selected($selectedProjectId == $link->project_id)>
                                 {{ $link->project?->project_name ?? '-' }}
@@ -28,9 +29,14 @@
                     </select>
                 </div>
                 <div class="col-md-6">
-                    <button type="submit" class="btn btn-light-primary">
-                        <i class="bi bi-funnel me-2"></i>Tampilkan
-                    </button>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-light-primary">
+                            <i class="bi bi-funnel me-2"></i>Tampilkan
+                        </button>
+                        <a href="{{ route('pm.daily-reports.index') }}" class="btn btn-light">
+                            Reset
+                        </a>
+                    </div>
                 </div>
             </form>
         </div>

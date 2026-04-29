@@ -73,6 +73,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
 
     Route::get('calendar', [CalendarController::class, 'index'])->name('calendar.index');
     Route::get('calendar/events', [CalendarController::class, 'getEvents'])->name('calendar.events');
+    Route::get('calendar/download-daily-reports', [CalendarController::class, 'downloadDailyReportsByDate'])->name('calendar.download-daily-reports');
 
     Route::get('daily-reports/{dailyReport}', [AdminDailyReportController::class, 'show'])->name('daily-reports.show');
     Route::get('daily-report/{dailyReport}/download-pdf', [AdminDailyReportController::class, 'downloadPdf'])->name('daily-reports.download-pdf');
@@ -98,7 +99,9 @@ Route::prefix('pm')->middleware(['auth', 'role:pm'])->name('pm.')->group(functio
     Route::get('calendar', [PMCalendarController::class, 'index'])->name('calendar.index');
     Route::get('calendar/events', [PMCalendarController::class, 'getEvents'])->name('calendar.events');
     Route::get('calendar/check-report', [PMCalendarController::class, 'checkReport'])->name('calendar.check');
+    Route::get('calendar/download-daily-reports', [PMCalendarController::class, 'downloadDailyReportsByDate'])->name('calendar.download-daily-reports');
 
+    Route::get('daily-reports/tasks-by-date', [DailyReportController::class, 'tasksByDate'])->name('daily-reports.tasks-by-date');
     Route::get('daily-report/{dailyReport}/download-pdf', [DailyReportController::class, 'downloadPdf'])->name('daily-reports.download-pdf');
     Route::resource('daily-reports', DailyReportController::class);
 

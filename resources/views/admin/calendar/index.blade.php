@@ -20,8 +20,11 @@
     <div class="card">
         <div class="card-header">
             <div class="card-title">Kalender</div>
-            <div class="card-toolbar" style="min-width: 320px;">
-                <select id="project_filter" class="form-select select2-calendar" data-placeholder="Filter Proyek">
+            <div class="card-toolbar d-flex flex-nowrap align-items-center gap-2" style="min-width: 320px;">
+                <button type="button" class="btn btn-light-primary flex-shrink-0" id="btnOpenDownloadRange" data-bs-toggle="modal" data-bs-target="#downloadRangeModal">
+                    <i class="bi bi-download me-2"></i>Download Report
+                </button>
+                <select id="project_filter" class="form-select select2-calendar w-auto" style="min-width: 260px;" data-placeholder="Filter Proyek">
                     <option value="">Semua Proyek</option>
                     @foreach ($projects as $p)
                         <option value="{{ $p->id }}">{{ $p->project_name }}</option>
@@ -31,6 +34,41 @@
         </div>
         <div class="card-body">
             <div id="kt_calendar_admin"></div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="downloadRangeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="GET" action="{{ route('admin.calendar.download-daily-reports') }}" id="downloadRangeForm">
+                    <input type="hidden" name="project_id" id="download_project_id" value="">
+
+                    <div class="modal-header">
+                        <h5 class="modal-title">Download Daily Report</h5>
+                        <button type="button" class="btn btn-sm btn-icon" data-bs-dismiss="modal" aria-label="Close">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label required">Tanggal Mulai</label>
+                                <input type="date" class="form-control" name="start_date" id="download_start_date" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label required">Tanggal Selesai</label>
+                                <input type="date" class="form-control" name="end_date" id="download_end_date" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-download me-2"></i>Download
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -94,9 +132,30 @@
         var dailyReportsShowBaseUrl = @json(url('/admin/daily-reports'));
 
         var filterSelect = document.getElementById('project_filter');
+        var downloadProjectIdInput = document.getElementById('download_project_id');
+        var downloadForm = document.getElementById('downloadRangeForm');
+        var btnOpenDownloadRange = document.getElementById('btnOpenDownloadRange');
 
         function getSelectedProjectId() {
             return filterSelect ? (filterSelect.value || '') : '';
+        }
+
+        function syncDownloadProjectId() {
+            if (downloadProjectIdInput) {
+                downloadProjectIdInput.value = getSelectedProjectId();
+            }
+        }
+
+        if (btnOpenDownloadRange) {
+            btnOpenDownloadRange.addEventListener('click', function () {
+                syncDownloadProjectId();
+            });
+        }
+
+        if (downloadForm) {
+            downloadForm.addEventListener('submit', function () {
+                syncDownloadProjectId();
+            });
         }
 
         if (window.$ && filterSelect) {

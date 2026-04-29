@@ -83,6 +83,13 @@
                             <span class="menu-title">Monitoring Kalender</span>
                         </a>
                     </div>
+
+                    <div class="menu-item">
+                        <a class="menu-link {{ request()->routeIs('pm.daily-reports.*') ? 'active' : '' }}" href="{{ route('pm.daily-reports.index') }}">
+                            <span class="menu-icon"><i class="bi bi-journal-text fs-2"></i></span>
+                            <span class="menu-title">Laporan Harian</span>
+                        </a>
+                    </div>
                 @endif
 
             </div>

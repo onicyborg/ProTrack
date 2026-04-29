@@ -36,6 +36,18 @@
                             <div class="fw-semibold">{{ $dailyReport->report_date }}</div>
                         </div>
                         <div class="col-md-4">
+                            <div class="text-muted">Kegiatan</div>
+                            <div class="fw-semibold">{{ $dailyReport->kegiatan ?? '-' }}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-muted">Lokasi Kegiatan</div>
+                            <div class="fw-semibold">{{ $dailyReport->lokasi_kegiatan ?? '-' }}</div>
+                        </div>
+                        <div class="col-12">
+                            <div class="text-muted">Rincian Kegiatan</div>
+                            <div class="fw-semibold">{{ $dailyReport->rincian_kegiatan ?? '-' }}</div>
+                        </div>
+                        <div class="col-md-4">
                             <div class="text-muted">Cuaca</div>
                             <div class="fw-semibold">{{ $dailyReport->weather_condition ?? '-' }}</div>
                         </div>
