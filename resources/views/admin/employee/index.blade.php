@@ -18,6 +18,9 @@
                         <tr class="text-start text-muted fw-bold fs-7 text-uppercase gs-0">
                             <th>Nama Karyawan</th>
                             <th>Posisi</th>
+                            <th>NIK</th>
+                            <th>No. HP</th>
+                            <th>Email</th>
                             <th>Username</th>
                             <th>Role</th>
                             <th class="text-end">Aksi</th>
@@ -28,6 +31,9 @@
                             <tr>
                                 <td>{{ $employee->employee_name }}</td>
                                 <td>{{ $employee->position ?? '-' }}</td>
+                                <td>{{ $employee->nik ?? '-' }}</td>
+                                <td>{{ $employee->phone_number ?? '-' }}</td>
+                                <td>{{ $employee->user?->email ?? '-' }}</td>
                                 <td>{{ $employee->user?->username ?? '-' }}</td>
                                 <td>
                                     @php
@@ -45,6 +51,12 @@
                                         data-id="{{ $employee->id }}"
                                         data-employee_name="{{ $employee->employee_name }}"
                                         data-position="{{ $employee->position }}"
+                                        data-nik="{{ $employee->nik }}"
+                                        data-phone_number="{{ $employee->phone_number }}"
+                                        data-birth_date="{{ $employee->birth_date }}"
+                                        data-gender="{{ $employee->gender }}"
+                                        data-address="{{ $employee->address }}"
+                                        data-email="{{ $employee->user?->email }}"
                                         data-username="{{ $employee->user?->username }}"
                                         data-role="{{ $employee->user?->role ?? 'employee' }}"
                                         data-has_user="{{ $employee->user_id ? '1' : '0' }}">
@@ -90,6 +102,35 @@
                         </div>
 
                         <div class="mb-4">
+                            <label class="form-label">NIK</label>
+                            <input type="text" name="nik" id="employee_nik" class="form-control" />
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">No. HP</label>
+                            <input type="text" name="phone_number" id="employee_phone_number" class="form-control" />
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Tanggal Lahir</label>
+                            <input type="date" name="birth_date" id="employee_birth_date" class="form-control" />
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Jenis Kelamin</label>
+                            <select name="gender" id="employee_gender" class="form-select">
+                                <option value="">-- Pilih --</option>
+                                <option value="L">L</option>
+                                <option value="P">P</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Alamat</label>
+                            <textarea name="address" id="employee_address" class="form-control" rows="3"></textarea>
+                        </div>
+
+                        <div class="mb-4">
                             <label class="form-label required">Role</label>
                             <select name="role" id="employee_role" class="form-select select2-role" required>
                                 <option value="">-- Pilih Role --</option>
@@ -103,6 +144,11 @@
                             <div class="mb-4">
                                 <label class="form-label" id="username_label">Username</label>
                                 <input type="text" name="username" id="employee_username" class="form-control" />
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">Email</label>
+                                <input type="email" name="email" id="employee_email" class="form-control" />
                             </div>
 
                             <div class="mb-4">
@@ -185,6 +231,7 @@
             var wrap = document.getElementById('account_fields');
             var username = document.getElementById('employee_username');
             var password = document.getElementById('employee_password');
+            var email = document.getElementById('employee_email');
             var usernameLabel = document.getElementById('username_label');
 
             var needsAccount = (role === 'admin' || role === 'pm');
@@ -197,6 +244,9 @@
             if (password) {
                 password.required = false;
                 if (!needsAccount) password.value = '';
+            }
+            if (email) {
+                if (!needsAccount) email.value = '';
             }
             if (usernameLabel) {
                 if (needsAccount) usernameLabel.classList.add('required');
@@ -256,7 +306,13 @@
 
             document.getElementById('employee_name').value = btn.dataset.employee_name || '';
             document.getElementById('employee_position').value = btn.dataset.position || '';
+            document.getElementById('employee_nik').value = btn.dataset.nik || '';
+            document.getElementById('employee_phone_number').value = btn.dataset.phone_number || '';
+            document.getElementById('employee_birth_date').value = btn.dataset.birth_date || '';
+            document.getElementById('employee_gender').value = btn.dataset.gender || '';
+            document.getElementById('employee_address').value = btn.dataset.address || '';
             document.getElementById('employee_username').value = btn.dataset.username || '';
+            document.getElementById('employee_email').value = btn.dataset.email || '';
 
             document.getElementById('employee_password').value = '';
 

@@ -26,6 +26,11 @@ class EmployeeController extends Controller
         $validated = $request->validate([
             'employee_name' => ['required', 'string', 'max:255'],
             'position' => ['nullable', 'string', 'max:255'],
+            'nik' => ['nullable', 'string', 'max:50'],
+            'phone_number' => ['nullable', 'string', 'max:50'],
+            'birth_date' => ['nullable', 'date'],
+            'gender' => ['nullable', 'string', 'max:20'],
+            'address' => ['nullable', 'string'],
             'role' => ['required', Rule::in(['admin', 'pm', 'employee'])],
         ]);
 
@@ -38,6 +43,12 @@ class EmployeeController extends Controller
                     'string',
                     'max:255',
                     Rule::unique('users', 'username')->whereNull('deleted_at'),
+                ],
+                'email' => [
+                    'nullable',
+                    'email',
+                    'max:255',
+                    Rule::unique('users', 'email'),
                 ],
                 'password' => ['nullable', 'string', 'min:6'],
             ]);
@@ -57,12 +68,14 @@ class EmployeeController extends Controller
                     $user->update([
                         'password' => $plainPassword,
                         'role' => $role,
+                        'email' => $accountValidated['email'] ?? null,
                     ]);
                 } else {
                     $user = User::create([
                         'username' => $accountValidated['username'],
                         'password' => $plainPassword,
                         'role' => $role,
+                        'email' => $accountValidated['email'] ?? null,
                     ]);
                 }
 
@@ -70,6 +83,11 @@ class EmployeeController extends Controller
                     'user_id' => $user->id,
                     'employee_name' => $validated['employee_name'],
                     'position' => $validated['position'] ?? null,
+                    'nik' => $validated['nik'] ?? null,
+                    'phone_number' => $validated['phone_number'] ?? null,
+                    'birth_date' => $validated['birth_date'] ?? null,
+                    'gender' => $validated['gender'] ?? null,
+                    'address' => $validated['address'] ?? null,
                 ]);
             });
 
@@ -80,6 +98,11 @@ class EmployeeController extends Controller
             'user_id' => null,
             'employee_name' => $validated['employee_name'],
             'position' => $validated['position'] ?? null,
+            'nik' => $validated['nik'] ?? null,
+            'phone_number' => $validated['phone_number'] ?? null,
+            'birth_date' => $validated['birth_date'] ?? null,
+            'gender' => $validated['gender'] ?? null,
+            'address' => $validated['address'] ?? null,
         ]);
 
         return redirect()->route('admin.employees.index')->with('success', 'Karyawan berhasil ditambahkan.');
@@ -92,6 +115,11 @@ class EmployeeController extends Controller
         $validated = $request->validate([
             'employee_name' => ['required', 'string', 'max:255'],
             'position' => ['nullable', 'string', 'max:255'],
+            'nik' => ['nullable', 'string', 'max:50'],
+            'phone_number' => ['nullable', 'string', 'max:50'],
+            'birth_date' => ['nullable', 'date'],
+            'gender' => ['nullable', 'string', 'max:20'],
+            'address' => ['nullable', 'string'],
             'role' => ['required', Rule::in(['admin', 'pm', 'employee'])],
         ]);
 
@@ -106,6 +134,12 @@ class EmployeeController extends Controller
                         'max:255',
                         Rule::unique('users', 'username')->ignore($employee->user_id),
                     ],
+                    'email' => [
+                        'nullable',
+                        'email',
+                        'max:255',
+                        Rule::unique('users', 'email')->ignore($employee->user_id),
+                    ],
                     'password' => ['nullable', 'string', 'min:6'],
                 ]);
             } else {
@@ -116,6 +150,12 @@ class EmployeeController extends Controller
                         'max:255',
                         Rule::unique('users', 'username')->whereNull('deleted_at'),
                     ],
+                    'email' => [
+                        'nullable',
+                        'email',
+                        'max:255',
+                        Rule::unique('users', 'email'),
+                    ],
                     'password' => ['nullable', 'string', 'min:6'],
                 ]);
             }
@@ -124,12 +164,18 @@ class EmployeeController extends Controller
                 $employee->update([
                     'employee_name' => $validated['employee_name'],
                     'position' => $validated['position'] ?? null,
+                    'nik' => $validated['nik'] ?? null,
+                    'phone_number' => $validated['phone_number'] ?? null,
+                    'birth_date' => $validated['birth_date'] ?? null,
+                    'gender' => $validated['gender'] ?? null,
+                    'address' => $validated['address'] ?? null,
                 ]);
 
                 if ($employee->user) {
                     $payload = [
                         'username' => $accountValidated['username'],
                         'role' => $role,
+                        'email' => $accountValidated['email'] ?? null,
                     ];
 
                     if (!empty($accountValidated['password'])) {
@@ -154,12 +200,14 @@ class EmployeeController extends Controller
                     $user->update([
                         'password' => $plainPassword,
                         'role' => $role,
+                        'email' => $accountValidated['email'] ?? null,
                     ]);
                 } else {
                     $user = User::create([
                         'username' => $accountValidated['username'],
                         'password' => $plainPassword,
                         'role' => $role,
+                        'email' => $accountValidated['email'] ?? null,
                     ]);
                 }
 
@@ -177,6 +225,11 @@ class EmployeeController extends Controller
             $employee->update([
                 'employee_name' => $validated['employee_name'],
                 'position' => $validated['position'] ?? null,
+                'nik' => $validated['nik'] ?? null,
+                'phone_number' => $validated['phone_number'] ?? null,
+                'birth_date' => $validated['birth_date'] ?? null,
+                'gender' => $validated['gender'] ?? null,
+                'address' => $validated['address'] ?? null,
                 'user_id' => null,
             ]);
 

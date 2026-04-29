@@ -109,7 +109,7 @@
 
                             <!--begin::Input group-->
                             <div class="fv-row mb-8">
-                                <input type="text" placeholder="Username" name="username" autocomplete="off"
+                                <input type="text" placeholder="Email / Username" name="username" autocomplete="off"
                                     class="form-control bg-transparent @error('username') is-invalid @enderror"
                                     value="{{ old('username') }}" />
                                 @error('username')

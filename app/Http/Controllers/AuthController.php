@@ -19,10 +19,24 @@ class AuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        $credentials = $request->only('username', 'password');
+        $login = $request->input('username');
+        $password = $request->input('password');
 
-        if (!Auth::attempt($credentials)) {
-            return back()->with('error', 'Username atau password salah.')->withInput();
+        $attempts = [
+            ['username' => $login, 'password' => $password],
+            ['email' => $login, 'password' => $password],
+        ];
+
+        $ok = false;
+        foreach ($attempts as $credentials) {
+            if (Auth::attempt($credentials)) {
+                $ok = true;
+                break;
+            }
+        }
+
+        if (!$ok) {
+            return back()->with('error', 'Email/Username atau password salah.')->withInput();
         }
 
         $request->session()->regenerate();

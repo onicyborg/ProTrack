@@ -21,12 +21,14 @@ class UserController extends Controller
     {
         $validated = $request->validate([
             'username' => ['required', 'string', 'max:255', 'unique:users,username'],
+            'email' => ['nullable', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:6'],
             'role' => ['required', Rule::in(['admin', 'pm', 'employee'])],
         ]);
 
         User::create([
             'username' => $validated['username'],
+            'email' => $validated['email'] ?? null,
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
         ]);
@@ -40,6 +42,7 @@ class UserController extends Controller
 
         $validated = $request->validate([
             'username' => ['required', 'string', 'max:255', Rule::unique('users', 'username')->ignore($user->id)],
+            'email' => ['nullable', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'password' => ['nullable', 'string', 'min:6'],
             'role' => ['required', Rule::in(['admin', 'pm', 'employee'])],
         ]);
@@ -47,6 +50,7 @@ class UserController extends Controller
         $payload = [
             'username' => $validated['username'],
             'role' => $validated['role'],
+            'email' => $validated['email'] ?? null,
         ];
 
         if (!empty($validated['password'])) {
