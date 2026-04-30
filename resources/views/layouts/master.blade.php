@@ -116,24 +116,37 @@
                             </button>
                         </div>
                         @auth
+                            @php
+                                $authUser = Auth::user();
+                                $authUser->loadMissing('employee');
+                                $authName = $authUser->employee?->employee_name ?: ($authUser->username ?? 'User');
+                                $authRole = ucfirst($authUser->role ?? '-');
+                            @endphp
                             <div class="dropdown">
                                 <button class="btn btn-light d-flex align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <div class="symbol symbol-35px symbol-circle me-2">
                                         <span class="symbol-label bg-primary text-white fw-bold">
-                                            {{ strtoupper(substr(Auth::user()->username ?? 'U', 0, 1)) }}
+                                            {{ strtoupper(substr($authName ?? 'U', 0, 1)) }}
                                         </span>
                                     </div>
                                     <div class="d-none d-md-flex flex-column text-start me-2">
-                                        <span class="fw-bold text-gray-800 lh-1">{{ Auth::user()->username ?? 'User' }}</span>
-                                        <span class="text-muted fs-8 lh-1">{{ ucfirst(Auth::user()->role ?? '-') }}</span>
+                                        <span class="fw-bold text-gray-800 lh-1">{{ $authName }}</span>
+                                        <span class="text-muted fs-8 lh-1">{{ $authRole }}</span>
                                     </div>
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end shadow">
                                     <li class="px-3 py-2">
-                                        <div class="fw-bold">{{ Auth::user()->username ?? 'User' }}</div>
-                                        <div class="text-muted small">{{ ucfirst(Auth::user()->role ?? '-') }}</div>
+                                        <div class="fw-bold">{{ $authName }}</div>
+                                        <div class="text-muted small">{{ $authRole }}</div>
                                     </li>
                                     <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <div class="px-3 py-2">
+                                            <a href="{{ route('profile.edit') }}" class="btn btn-sm btn-primary w-100">
+                                                <i class="bi bi-person-gear me-2"></i>Manage Account
+                                            </a>
+                                        </div>
+                                    </li>
                                     <li>
                                         <form action="{{ route('logout') }}" method="POST" class="px-3 py-2">
                                             @csrf

@@ -13,6 +13,7 @@ use App\Http\Controllers\PM\CalendarController as PMCalendarController;
 use App\Http\Controllers\PM\ProjectController as PMProjectController;
 use App\Http\Controllers\PM\DailyReportController;
 use App\Http\Controllers\PM\ProjectTaskController;
+use App\Http\Controllers\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -60,6 +61,11 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+});
 
 /*
 |--------------------------------------------------------------------------
