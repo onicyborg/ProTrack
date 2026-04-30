@@ -74,7 +74,7 @@
         <!--begin::Page-->
         <div class="app-page flex-column flex-column-fluid" id="kt_app_page">
             <!--begin::Header-->
-            <div id="kt_app_header" class="app-header" data-kt-sticky="true"
+            <div id="kt_app_header" class="app-header bg-body border-bottom shadow-sm" data-kt-sticky="true"
                 data-kt-sticky-activate="{default: true, lg: true}" data-kt-sticky-name="app-header-minimize"
                 data-kt-sticky-offset="{default: '200px', lg: '0'}" data-kt-sticky-animation="false">
                 <!--begin::Header container-->
