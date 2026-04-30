@@ -227,7 +227,7 @@ class ProjectHierarchySeeder extends Seeder
                         $end = $project->end_date ? Carbon::parse($project->end_date) : Carbon::now()->addDays(60);
 
                         $taskStart = $start->copy()->addDays($faker->numberBetween(0, 20));
-                        $taskEnd = $taskStart->copy()->addDays($faker->numberBetween(5, 25));
+                        $taskEnd = $taskStart->copy()->addDays($faker->numberBetween(30, 90));
                         if ($taskEnd->greaterThan($end)) {
                             $taskEnd = $end->copy();
                         }
@@ -274,15 +274,18 @@ class ProjectHierarchySeeder extends Seeder
                     $projectStart = $project->start_date ? Carbon::parse($project->start_date) : Carbon::now()->subDays(30);
                     $projectEnd = $project->end_date ? Carbon::parse($project->end_date) : Carbon::now();
 
-                    $rangeStart = $projectStart->greaterThan(Carbon::now()->subDays(30)) ? $projectStart->copy() : Carbon::now()->subDays(30);
-                    $rangeEnd = $projectEnd->lessThan(Carbon::now()) ? $projectEnd->copy() : Carbon::now();
+                    $monthStart = Carbon::create(Carbon::now()->year, 5, 1)->startOfMonth();
+                    $monthEnd = $monthStart->copy()->endOfMonth();
+
+                    $rangeStart = $projectStart->greaterThan($monthStart) ? $projectStart->copy() : $monthStart->copy();
+                    $rangeEnd = $projectEnd->lessThan($monthEnd) ? $projectEnd->copy() : $monthEnd->copy();
 
                     if ($rangeStart->greaterThan($rangeEnd)) {
                         continue;
                     }
 
                     $dates = collect(CarbonPeriod::create($rangeStart, $rangeEnd))
-                        ->map(fn($d) => $d->toDateString())
+                        ->map(fn(Carbon $d) => $d->toDateString())
                         ->shuffle()
                         ->take($faker->numberBetween(6, 12))
                         ->values();
