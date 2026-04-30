@@ -44,8 +44,6 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <form method="GET" action="{{ route('pm.calendar.download-daily-reports') }}" id="downloadRangeForm">
-                    <input type="hidden" name="project_id" id="download_project_id" value="">
-
                     <div class="modal-header">
                         <h5 class="modal-title">Download Daily Report</h5>
                         <button type="button" class="btn btn-sm btn-icon" data-bs-dismiss="modal" aria-label="Close">
@@ -54,6 +52,15 @@
                     </div>
                     <div class="modal-body">
                         <div class="row g-4">
+                            <div class="col-12">
+                                <label class="form-label">Proyek</label>
+                                <select name="project_id" id="download_project_id" class="form-select">
+                                    <option value="">Semua Proyek</option>
+                                    @foreach ($projects as $p)
+                                        <option value="{{ $p->id }}">{{ $p->project_name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                             <div class="col-md-6">
                                 <label class="form-label required">Tanggal Mulai</label>
                                 <input type="date" class="form-control" name="start_date" id="download_start_date" required>
@@ -89,7 +96,6 @@
 
         var filterSelect = document.getElementById('project_filter');
         var downloadProjectIdInput = document.getElementById('download_project_id');
-        var downloadForm = document.getElementById('downloadRangeForm');
         var btnOpenDownloadRange = document.getElementById('btnOpenDownloadRange');
 
         function getSelectedProjectId() {
@@ -104,12 +110,6 @@
 
         if (btnOpenDownloadRange) {
             btnOpenDownloadRange.addEventListener('click', function () {
-                syncDownloadProjectId();
-            });
-        }
-
-        if (downloadForm) {
-            downloadForm.addEventListener('submit', function () {
                 syncDownloadProjectId();
             });
         }
